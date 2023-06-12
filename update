@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Reduz o número de réplicas para zero
+docker service scale RedeUA_django=0
+
+cd ./django
+
+docker build -t 127.0.0.1:5000/imagem_django .
+
+cd -
+
+docker push 127.0.0.1:5000/imagem_django
+
+docker service update --force --image 127.0.0.1:5000/imagem_django RedeUA_django
+
+docker service scale RedeUA_django=3
+

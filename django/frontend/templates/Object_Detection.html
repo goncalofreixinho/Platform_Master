@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+    <meta charset="UTF-8">
+    <title>Object Detection</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+</head>
+<body>
+    <h1>Object Detection</h1>
+    <form method="post" action="/api/" enctype="multipart/form-data">
+        <label for="image">Image:</label><br>
+        <input type="file" name="image_bytes"><br><br>
+        <div id="drop-area"><p>Drag and drop an image here</p> </div>
+        <div class="button-container">
+        <input type="submit" value="Detect">
+        <input type="reset" value="Clear" class="reset">
+        </div>
+    </form>
+
+    <div class="results-container">
+        <h2>Results:</h2>
+        <ul id="detection-results"></ul>
+    </div>
+
+   <form method="post" action="/api/" enctype="multipart/form-data" class="feedback-form">
+
+       <input type="hidden" id="user_input" name="user_input">
+        <input type="hidden" id="output" name="output">
+
+        <label for="feedback">Leave your feedback about the model!</label><br>
+
+        <div class="star-widget">
+        <input type="radio" name="rate" id="rate-1">
+        <label for="rate-1" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-2">
+        <label for="rate-2" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-3">
+        <label for="rate-3" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-4">
+        <label for="rate-4" class="fas fa-star"></label>
+            <input type="radio" name="rate" id="rate-5">
+        <label for="rate-5" class="fas fa-star"></label>
+        </div>
+       <textarea name="feedback_text" id="feedback_text" rows="4" cols="50" placeholder="Enter your feedback here..."></textarea><br><br>
+        <div class="button-container">
+        <input type="submit" value="Submit">
+        </div>
+    </form>
+
+    <script>
+        const form = document.querySelector('form');
+        const clearButton = document.querySelector('.reset');
+        const detectionResultsElement = document.querySelector('#detection-results');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const response = await fetch('/api/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            predictedClassElement.textContent = data.class;
+
+            const confidenceElement = document.querySelector('#score');
+            confidenceElement.textContent = data.score.toFixed(2);
+        });
+        clearButton.addEventListener('click', (event) => {
+            sourceTextArea.value = '';
+            translationElement.textContent = '';
+        });
+        const dropArea = document.getElementById('drop-area');
+
+        // Lida com os eventos de arrastar e soltar
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+          dropArea.addEventListener(eventName, preventDefaults, false)
+        });
+
+        function preventDefaults (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        // Muda o estilo do elemento div quando o usuário estiver arrastando um arquivo
+        ['dragenter', 'dragover'].forEach(eventName => {
+          dropArea.addEventListener(eventName, () => {
+            dropArea.classList.add('dragging')
+          }, false)
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          dropArea.addEventListener(eventName, () => {
+            dropArea.classList.remove('dragging')
+          }, false)
+        });
+
+        // Lida com o evento de soltar um arquivo na área de "drop"
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        async function handleDrop(event) {
+          const files = event.dataTransfer.files;
+          const formData = new FormData();
+          formData.append('image_bytes', files[0]);
+
+          const response = await fetch('/api/', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+          predictedClassElement.textContent = data.class;
+          confidenceElement.textContent = data.score.toFixed(2);
+        }
+
+         const feedbackForm = document.querySelector('.feedback-form');
+
+            feedbackForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const formData = new FormData(feedbackForm);
+                const response = await fetch('/api/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    alert('Feedback salvo com sucesso!');
+                    feedbackForm.reset();
+                } else {
+                    alert('Ocorreu um erro ao salvar o feedback. Por favor, tente novamente.');
+                }
+            });
+
+            const starInputs = document.querySelectorAll('input[type="radio"][name="rate"]');
+            const ratingInput = document.getElementById('rating');
+
+            starInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    ratingInput.value = input.value;
+                });
+            });
+
+    </script>
+</body>
+</html>

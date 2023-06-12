@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Path where Django is located on project
+DJANGO_PATH=~/Platform_Master/django
+
+# First argument is the name of the Python file
+PYTHON_FILE=$1
+
+# Second argument is the name of the file containing the IPs
+IP_FILE=$2
+
+# Third argument is the IP for starting Docker Swarm
+SWARM_IP=$3
+
+# Read the value of the environment variable REDEUA_TOKEN from the file Token.env
+THESTACK_TOKEN=$(cat Token.env | grep "THESTACK_TOKEN" | cut -d '=' -f2)
+
+# Remove the existing script.py file, if any
+rm -f $DJANGO_PATH/script.py
+
+# Copy and rename the Python file to script.py in the desired location
+cp $PYTHON_FILE $DJANGO_PATH/script.py
+
+# Replace the value of the variable REDEUA_TOKEN in the docker-compose.yml file
+sed -i "s/THESTACK_TOKEN_REPLACE/$THESTACK_TOKEN/g" docker-compose.yml
+
+# Starting Docker Swarm
+sudo docker swarm init --advertise-addr $SWARM_IP:8089 --listen-addr 0.0.0.0:8089 --data-path-port=7789 > out_join.txt
+
+# Extract the union command from the file out_join.txt
+VAR_JOIN=$(cat out_join.txt | grep "docker swarm join --")
+
+# Read the IP file and execute the join command for each IP
+while read -r IP
+do
+    ssh admin@$IP "$VAR_JOIN"
+done < $IP_FILE
+
+# Create the Docker registry service
+docker service create --name registry --publish published=5000,target=5000 registry:2
+
+# Run the docker-compose build
+docker-compose build
+
+# Push images to Docker Registry
+docker-compose push
+
+# Deploy the Stack in Docker Swarm
+docker stack deploy --compose-file docker-compose.yml TheStack
+
+# Print the final message
+echo "You can access now -> http://$SWARM_IP:8089/api/"

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Text Generator</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+</head>
+<body>
+    <h1>Text Generator</h1>
+    <form method="post" action="/api/">
+        <label for="text">Text:</label><br>
+        <textarea name="prompt" rows="10" cols="30"></textarea><br><br>
+        <div class="button-container">
+        <input type="submit" value="Submit">
+            <input type="reset" value="Clear" class="reset"></div>
+    </form>
+
+    <div class="results-container">
+        <h2>Results:</h2>
+        <p><strong>Text Generated:</strong> <span id="text_generated"></span></p>
+
+    </div>
+<form method="post" action="/api/feedback/" enctype="multipart/form-data" class="feedback-form">
+
+        <input type="hidden" id="user_input" name="user_input">
+        <input type="hidden" id="output" name="output">
+
+        <label for="feedback">Leave your feedback about the model!</label><br>
+
+        <div class="star-widget">
+        <input type="radio" name="rating" id="rate-1" value="5">
+        <label for="rate-1" class="fas fa-star"></label>
+        <input type="radio" name="rating" id="rate-2" value="4">
+        <label for="rate-2" class="fas fa-star"></label>
+        <input type="radio" name="rating" id="rate-3" value="3">
+        <label for="rate-3" class="fas fa-star"></label>
+        <input type="radio" name="rating" id="rate-4" value="2">
+        <label for="rate-4" class="fas fa-star"></label>
+        <input type="radio" name="rating" id="rate-5" value="1">
+        <label for="rate-5" class="fas fa-star"></label>
+
+
+        </div>
+       <textarea name="feedback_text" id="feedback_text" rows="4" cols="50" placeholder="Enter your feedback here..."></textarea><br><br>
+        <div class="button-container">
+        <input type="submit" value="Submit">
+        </div>
+    </form>
+
+
+
+
+    <!-- Solicitations for Api -->
+
+
+
+    <script>
+        const form = document.querySelector('form');
+        const clearButton = document.querySelector('.reset');
+        const predictedClassElement = document.querySelector('#text_generated');
+
+        const userInputElement = document.querySelector('#user_input');
+        const outputElement = document.querySelector('#output');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const response = await fetch('/api/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            predictedClassElement.textContent = data.text_generated;
+
+            // Save the user input and output to the hidden input fields
+            userInputElement.value = form.elements.prompt.value;
+            outputElement.value = data.text_generated;
+        });
+
+
+        const feedbackForm = document.querySelector('.feedback-form');
+
+        feedbackForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(feedbackForm);
+            const response = await fetch('/api/feedback/', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                alert('Feedback salvo com sucesso!');
+                feedbackForm.reset();
+            } else {
+                alert('Ocorreu um erro ao salvar o feedback. Por favor, tente novamente.');
+            }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  django:
+    image: 127.0.0.1:5000/imagem_django
+    build: ./django
+    ports:
+      - "8000"
+    environment:
+      - PORT=8000
+      - THESTACK_TOKEN=${THESTACK_TOKEN}
+    depends_on:
+      - db
+    volumes:
+      - static:/static
+    deploy:
+       replicas: 3
+    networks:
+      - bridge
+      - default
+    hostname: django
+
+  nginx:
+    image: 127.0.0.1:5000/imagem_nginx
+    build: ./nginx
+    ports:
+      - "8081:80"
+    depends_on:
+      - django
+    volumes:
+      - static:/static
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    hostname: nginx
+    networks:
+       - default
+  db:
+    image: mysql:5.7-debian
+    environment:
+      MYSQL_DATABASE: 'mydatabase'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: 'MyPassword123@'
+      MYSQL_ROOT_PASSWORD: 'palavrapasse'
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_LOG_CONSOLE: 'true'
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    deploy:
+       placement:
+           constraints:
+                - node.role == manager
+    hostname: db
+    networks:
+       - default
+volumes:
+  db_data:
+  static:
+
+networks:
+  bridge:
+    external: true
+

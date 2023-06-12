@@ -1,0 +1,9 @@
+#!/bin/bash
+
+REPLICAS=$1
+
+
+
+docker service scale RedeUA_django=0
+
+docker service scale RedeUA_django=$REPLICAS

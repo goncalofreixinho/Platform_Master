@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Image Classification</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+</head>
+<body>
+    <h1>Image Classification</h1>
+    <form method="post" action="/api/" enctype="multipart/form-data">
+        <label for="image">Image:</label><br>
+        <input type="file" name="image"><br><br>
+        <div id="drop-area"><p>Drag and drop an image here</p> </div>
+        <div class="button-container">
+        <input type="submit" value="Classify">
+        <input type="reset" value="Clear" class="reset">
+        </div>
+    </form>
+
+    <div class="results-container">
+        <h2>Results:</h2>
+        <p><strong>Predicted class:</strong> <span id="predicted-class"></span></p>
+        <p><strong>Score:</strong> <span id="score"></span>
+    </div>
+
+<form method="post" action="/api/feedback/" enctype="multipart/form-data" class="feedback-form">
+
+        <input type="hidden" id="user_input_image" name="user_input_image">
+        <input type="hidden" id="output_image" name="output_image">
+
+        <label for="feedback">Leave your feedback about the model!</label><br>
+
+        <div class="star-widget">
+        <input type="radio" name="rating" id="rate-1" value="5">
+        <label for="rate-1" class="fas fa-star"></label>
+        <input type="radio" name="rating" id="rate-2" value="4">
+        <label for="rate-2" class="fas fa-star"></label>
+        <input type="radio" name="rating" id="rate-3" value="3">
+        <label for="rate-3" class="fas fa-star"></label>
+        <input type="radio" name="rating" id="rate-4" value="2">
+        <label for="rate-4" class="fas fa-star"></label>
+        <input type="radio" name="rating" id="rate-5" value="1">
+        <label for="rate-5" class="fas fa-star"></label>
+
+
+        </div>
+       <textarea name="feedback_text" id="feedback_text" rows="4" cols="50" placeholder="Enter your feedback here..."></textarea><br><br>
+        <div class="button-container">
+        <input type="submit" value="Submit">
+        </div>
+    </form>
+
+
+
+    <!-- Solicitations for Api -->
+    <!-- try curl -X POST -F 'image=@//home/goncalo/Downloads/gatinhos.jpg' http://localhost:8000/api/ -->
+
+
+    <script>
+        const form = document.querySelector('form');
+        const clearButton = document.querySelector('.reset');
+        const predictedClassElement = document.querySelector('#predicted-class');
+
+        form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const response = await fetch('/api/', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        // Converta a imagem enviada para uma string Base64 e atribua-a a user_input_image
+        const fileInput = form.querySelector('input[type=file]');
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            document.getElementById('user_input_image').value = reader.result;
+        };
+        reader.readAsDataURL(file);
+
+        // Atribua a classe prevista a output_image
+        document.getElementById('output_image').value = data.class;
+
+        // Continue como antes
+        predictedClassElement.textContent = data.class;
+        const confidenceElement = document.querySelector('#score');
+        confidenceElement.textContent = data.score.toFixed(2);
+    });
+        clearButton.addEventListener('click', (event) => {
+            sourceTextArea.value = '';
+            translationElement.textContent = '';
+        });
+        const dropArea = document.getElementById('drop-area');
+
+        // Lida com os eventos de arrastar e soltar
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+          dropArea.addEventListener(eventName, preventDefaults, false)
+        });
+
+        function preventDefaults (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        // Muda o estilo do elemento div quando o usuário estiver arrastando um arquivo
+        ['dragenter', 'dragover'].forEach(eventName => {
+          dropArea.addEventListener(eventName, () => {
+            dropArea.classList.add('dragging')
+          }, false)
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          dropArea.addEventListener(eventName, () => {
+            dropArea.classList.remove('dragging')
+          }, false)
+        });
+
+        // Lida com o evento de soltar um arquivo na área de "drop"
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        async function handleDrop(event) {
+          const files = event.dataTransfer.files;
+          const formData = new FormData();
+          formData.append('image', files[0]);
+
+          const response = await fetch('/api/', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+          predictedClassElement.textContent = data.class;
+          confidenceElement.textContent = data.score.toFixed(2);
+        }
+
+         const feedbackForm = document.querySelector('.feedback-form');
+
+            feedbackForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const formData = new FormData(feedbackForm);
+                const response = await fetch('/api/feedback/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    alert('Feedback salvo com sucesso!');
+                    feedbackForm.reset();
+                } else {
+                    alert('Ocorreu um erro ao salvar o feedback. Por favor, tente novamente.');
+                }
+            });
+
+    </script>
+</body>
+</html>
