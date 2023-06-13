@@ -51,5 +51,5 @@ When Swarm Cluster is created, three replicas of the Django service are created 
 
 For example:
 ```
-./repication 6
+./replication 6
 ```
