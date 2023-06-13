@@ -17,22 +17,21 @@ import torch
 
 def init():
 
-   # Carregar o modelo pré-treinado para classificação de texto
+   # Load the pre-trained template for text classification
     model = pipeline(
         "text-classification",
         model="distilbert-base-uncased-finetuned-sst-2-english",
 
     )
-    # Retornar o modelo carregado
+    # Return the loaded model
     return model
 
 
 def inference(text: str, model) -> Tuple[int, List[float]]:
-    # Passar o input pelo modelo para obter as probabilidades para todas as classes
+    # Pass the input through the model to obtain the probabilities for all classes
     result = model(text)[0]
     predicted_class = result['label']
     probs = result['score']
 
-    # Retornar a classe prevista e e a sua probabilidade
+    # Return the predicted class e and its probability
     return predicted_class, probs
-
