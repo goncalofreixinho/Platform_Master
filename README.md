@@ -9,6 +9,12 @@ Check if you have docker installed and what version you have. If you don't have 
 ```
 docker --version
 ```
+
+Clone the repository code
+-----------------------------------------
+```
+git clone https://github.com/goncalofreixinho/Platform_Master.git
+```
 Check SSH Keys permissions
 -----------------------------------------
 You need to have SSH Keys permissions to be able to add the machines you want to the Swarm Cluster automatically. This requires the username on all machines you wish to add to the Swarm Cluster as Worker Node to be "admin".
