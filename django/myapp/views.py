@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 import torch
+import datetime
 from PIL import Image
 import torchvision.transforms as transforms
 from transformers import ViTFeatureExtractor, ViTForImageClassification
@@ -81,7 +82,8 @@ def api(request):
             return JsonResponse(result)
 
         elif 'text' in request.POST:
-            print("THE REQUEST WAS SENT HERE!")
+            current_time = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+            print(f"[{current_time}] THE REQUEST WAS SENT HERE!")
             # Get the text of the input
             text = request.POST.get('text')
 
