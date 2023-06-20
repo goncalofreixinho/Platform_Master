@@ -12,7 +12,7 @@ IP_FILE=$2
 # Third argument is the IP for starting Docker Swarm
 SWARM_IP=$3
 
-# Read the value of the environment variable REDEUA_TOKEN from the file Token.env
+# Read the value of the environment variable THESTACK_TOKEN from the file Token.env
 THESTACK_TOKEN=$(cat Token.env | grep "THESTACK_TOKEN" | cut -d '=' -f2)
 
 # Remove the existing script.py file, if any
@@ -21,7 +21,7 @@ rm -f $DJANGO_PATH/script.py
 # Copy and rename the Python file to script.py in the desired location
 cp $PYTHON_FILE $DJANGO_PATH/script.py
 
-# Replace the value of the variable REDEUA_TOKEN in the docker-compose.yml file
+# Replace the value of the variable THESTACK_TOKEN in the docker-compose.yml file
 sed -i "s/THESTACK_TOKEN_REPLACE/$THESTACK_TOKEN/g" docker-compose.yml
 
 # Starting Docker Swarm
