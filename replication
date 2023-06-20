@@ -4,6 +4,6 @@ REPLICAS=$1
 
 
 
-docker service scale RedeUA_django=0
+docker service scale TheStack_django=0
 
-docker service scale RedeUA_django=$REPLICAS
+docker service scale TheStack_django=$REPLICAS
