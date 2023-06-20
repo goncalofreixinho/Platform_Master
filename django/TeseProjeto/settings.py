@@ -138,6 +138,6 @@ STATIC_ROOT = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend/static')]
 
 # Gera um token
-TOKEN_SECRET = os.getenv('REDEUA_TOKEN')
+TOKEN_SECRET = os.getenv('THESTACK_TOKEN')
 # Imprime o token na linha de comando
 print(f'Your acess Token is: {TOKEN_SECRET}')
