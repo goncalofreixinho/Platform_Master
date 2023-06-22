@@ -53,3 +53,11 @@ For example:
 ```
 ./replication 6
 ```
+
+Interact via Web Interface or via Model API
+---------------------------------------------
+You can interact with the models using the Web Interface that is created or via Model API by sending a curl, for example:
+
+```
+curl --location --request POST 'http://localhost:8081/api/' --form 'text="This is a negative sentence."'
+```
