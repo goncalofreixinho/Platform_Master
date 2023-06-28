@@ -72,9 +72,13 @@ def api(request):
             context = request.POST.get('context', '')
             question = request.POST.get('question', '')
 
-            # Call the inference function and give the output (answer)
-            result = inference(context, question)
-
+            if model is None:
+            # Call the inference function and get the output (answer)
+                result = inference(context, question)
+            else:
+            # Call the inference function with the specified model and get the output (answer)
+                result = inference(context, question, model)
+                
             # Add the custom keys to the result dictionary
             result = {'answer': result['answer'], 'score': result['score']}
 
